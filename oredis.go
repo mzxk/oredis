@@ -3,7 +3,7 @@ package oredis
 import (
 	"time"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/gomodule/redigo/redis"
 )
 
 type Oredis struct {
@@ -14,10 +14,10 @@ func (t *Oredis) Get() redis.Conn {
 	conn := t.pool.Get()
 	return conn
 }
-func (t *Oredis) GetDB(i int) redis.Conn {
+func (t *Oredis) GetDB(i int) (redis.Conn, error) {
 	conn := t.pool.Get()
-	conn.Do("SELECT", i)
-	return conn
+	_, err := conn.Do("SELECT", i)
+	return conn, err
 }
 
 //New return redis.pool
