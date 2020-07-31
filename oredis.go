@@ -1,6 +1,7 @@
 package oredis
 
 import (
+	"runtime"
 	"time"
 
 	"github.com/gomodule/redigo/redis"
@@ -23,15 +24,20 @@ func (t *Oredis) GetDB(i int) (redis.Conn, error) {
 
 //New return redis.pool
 func New(add, pwd string) *Oredis {
+	max := 1000
+	if runtime.GOOS == "darwin" {
+		max = 100
+	}
 	p := &redis.Pool{
 		MaxIdle:   10,
-		MaxActive: 200,
+		MaxActive: max,
 		Dial: func() (redis.Conn, error) {
 			c, err := redis.Dial("tcp", add,
 				redis.DialConnectTimeout(1*time.Second),
 				redis.DialReadTimeout(10*time.Second),
 				redis.DialWriteTimeout(10*time.Second),
 				redis.DialPassword(pwd),
+				redis.DialKeepAlive(5*time.Second),
 			)
 			if err != nil {
 				return nil, err
